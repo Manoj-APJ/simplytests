@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Question {
+  id            String         @id @default(uuid())
+  text          String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String // "A", "B", "C", "D"
+  explanation   String?
+  topic         String
+  difficulty    String // "Easy", "Medium", "Hard"
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  tests         TestQuestion[]
+}
+
+model Test {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  duration    Int // in minutes
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  questions   TestQuestion[]
+  attempts    Attempt[]
+}
+
+model TestQuestion {
+  testId     String
+  questionId String
+  order      Int // To maintain sequence of questions
+  test       Test     @relation(fields: [testId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
+
+  @@id([testId, questionId])
+}
+
+model Attempt {
+  id            String   @id @default(uuid())
+  testId        String
+  test          Test     @relation(fields: [testId], references: [id])
+  score         Float    @default(0)
+  totalQuestions Int
+  correctCount  Int      @default(0)
+  incorrectCount Int     @default(0)
+  accuracy      Float    @default(0)
+  answers       Json // Stores user answers: { questionId: selectedOption }
+  submittedAt   DateTime @default(now())
+
+  @@index([testId])
+}
