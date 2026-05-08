@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "windows"]
 }
 
@@ -18,10 +15,10 @@ model Question {
   optionB       String
   optionC       String
   optionD       String
-  correctAnswer String // "A", "B", "C", "D"
+  correctAnswer String
   explanation   String?
   topic         String
-  difficulty    String // "Easy", "Medium", "Hard"
+  difficulty    String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   tests         TestQuestion[]
@@ -31,34 +28,34 @@ model Test {
   id          String         @id @default(uuid())
   title       String
   description String?
-  duration    Int // in minutes
+  duration    Int
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
-  questions   TestQuestion[]
   attempts    Attempt[]
+  questions   TestQuestion[]
 }
 
 model TestQuestion {
   testId     String
   questionId String
-  order      Int // To maintain sequence of questions
-  test       Test     @relation(fields: [testId], references: [id])
+  order      Int
   question   Question @relation(fields: [questionId], references: [id])
+  test       Test     @relation(fields: [testId], references: [id])
 
   @@id([testId, questionId])
 }
 
 model Attempt {
-  id            String   @id @default(uuid())
-  testId        String
-  test          Test     @relation(fields: [testId], references: [id])
-  score         Float    @default(0)
+  id             String   @id @default(uuid())
+  testId         String
+  score          Float    @default(0)
   totalQuestions Int
-  correctCount  Int      @default(0)
-  incorrectCount Int     @default(0)
-  accuracy      Float    @default(0)
-  answers       Json // Stores user answers: { questionId: selectedOption }
-  submittedAt   DateTime @default(now())
+  correctCount   Int      @default(0)
+  incorrectCount Int      @default(0)
+  accuracy       Float    @default(0)
+  answers        Json
+  submittedAt    DateTime @default(now())
+  test           Test     @relation(fields: [testId], references: [id])
 
   @@index([testId])
 }
